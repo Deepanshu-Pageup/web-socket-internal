@@ -21,13 +21,13 @@ The alternatives must be revisited if discovery reveals requirements that materi
 
 ## Consequences
 
-ws handles transport framing and lifecycle primitives; application-level Pusher protocol behavior remains our responsibility.
+ws handles transport framing and lifecycle primitives; the application-level protocol (ADR-0018), authentication, and channel behavior remain our responsibility. The transport is standard WebSocket; no third-party application protocol is implied.
 
 ## Constraints and notes
 
 - This ADR applies to the generic internal real-time server, not to business logic in consuming applications.
 - Do not add infrastructure or scope beyond the decision without documenting and reviewing the trade-off.
-- For Pusher compatibility decisions, validate behavior against the company's actual client and server SDK versions.
+- Protocol, authentication, and publishing contracts are project-owned design items; do not treat them as decided until their ADRs are approved.
 
 ## Review checklist
 

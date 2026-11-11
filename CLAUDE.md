@@ -25,7 +25,12 @@ and report the blocker.
   and Phase 01 architecture/ADRs are reviewed and approved.
 - Work only within the currently approved phase. Do not infer approval from a
   user request, a roadmap deliverable, or an unfinished implementation.
-- Do not broaden Pusher compatibility beyond evidenced company usage.
+- Do not implement compatibility with, or depend on the protocol, client SDKs,
+  or server SDKs of, any third-party realtime service (see ADR-0004). The
+  project owns its protocol, client SDK, authentication model, publishing API,
+  and channel/event conventions. Do not invent message names, token formats,
+  cryptographic algorithms, or endpoint contracts: they are design items that
+  require ADR review and approval first.
 - Preserve the approved baseline: Node.js 24 LTS, TypeScript, npm,
   `package-lock.json`, `ws`, Node `http`, `node:crypto`, Zod, Pino, Vitest,
   Docker, and Docker Compose. Do not substitute pnpm, Socket.IO, or a custom

@@ -14,7 +14,8 @@ Implement channel membership and server-side event routing for the agreed featur
 - Public channel behavior.
 - Private channel behavior if confirmed.
 - Event dispatch and broadcast.
-- Exclude-originating-socket behavior if required.
+- Excluding a connection from delivery only if a requirement is established.
+- Channel naming and event envelope conventions per the approved channel and event model (ADR-0021).
 - Cleanup on disconnect.
 - Channel and payload limits.
 

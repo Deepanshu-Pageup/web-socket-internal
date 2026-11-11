@@ -1,6 +1,6 @@
 # Deployment Architecture
 
-**Status:** Draft — not reviewed or approved (Phase 01 not started)
+**Status:** Draft — revised for the independent architecture (ADR-0004); not re-reviewed or approved
 **Related:** [System architecture](SYSTEM-ARCHITECTURE.md) · [Security](SECURITY.md)
 
 > No infrastructure is provisioned by this document. No paid hosting, Redis,
@@ -50,7 +50,7 @@ illustrative placeholders, not final:
 
 | Group | Examples |
 |---|---|
-| Application | app ID, app key, app secret |
+| Deployment credentials | deployment identifier; client-token verification credential(s); publisher credential(s) **[DESIGN: ADR-0020, ADR-0009]** |
 | Network | host, port, WebSocket path |
 | Origins | allowed origins |
 | Limits | max message size, max subscriptions, outbound buffer, rate limits |

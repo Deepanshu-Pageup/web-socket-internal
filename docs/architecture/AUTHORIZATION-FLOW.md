@@ -1,13 +1,13 @@
 # Authorization Flow
 
-**Status:** Draft — not reviewed or approved (Phase 01 not started)
+**Status:** Draft — revised for the independent architecture (ADR-0004); not re-reviewed or approved
 **Related:** [System architecture](SYSTEM-ARCHITECTURE.md) ·
 [Security](SECURITY.md) · [Channel and event flow](CHANNEL-AND-EVENT-FLOW.md)
 
-> Exact signature string formats, field names, and encodings must be taken from
-> official Pusher documentation and verified against company SDK behavior and
-> compatibility tests. They are intentionally not restated here as decided
-> behavior. Examples use placeholders only; never use real keys or secrets.
+> Token formats, claim names, cryptographic algorithms, and wire fields are
+> **not finalized**. They are **[DESIGN]** items (ADR-0020) and must be specified
+> and approved before implementation. Examples use placeholders only; never use
+> real keys, secrets, or tokens.
 
 ## 1. Responsibility split
 
@@ -15,86 +15,105 @@
 |---|---|---|
 | Authenticate the end user | Owns | Does not |
 | Decide whether the user may access a channel | Owns | Does not |
-| Sign the channel authorization | Produces signature using the app secret | Verifies independently |
-| Hold the application secret | Yes | Yes (server-side only) |
-| Hold the secret in browser/mobile code | **Never** | **Never** |
+| Issue short-lived, scoped connection tokens | Owns | Does not |
+| Validate tokens and authorization evidence | Does not | Owns (independently) |
+| Hold long-lived server credentials | Yes | Yes (server-side only) |
+| Hold long-lived server credentials in browser/mobile code | **Never** | **Never** |
 
-The server must never trust an unsigned or unverified authorization response.
+The server must never trust unverified tokens or authorization evidence. Clients
+receive only short-lived, scoped tokens.
 
 ## 2. Credentials
 
-Each deployment is configured with its own application ID, key, and secret
-(placeholders: `APP_ID`, `APP_KEY`, `APP_SECRET`). The key is public (sent by
-clients); the secret is never sent to clients, logged, or included in errors.
-Secrets are supplied via environment/secret mechanism at deploy time, not
-committed. Secret rotation approach **[OPEN]**.
+Each deployment is configured with its own credentials, supplied by the
+deployment's secret mechanism and never committed. Which credentials exist
+(token verification key(s), publisher credential(s)), whether they are symmetric
+or asymmetric, and how they are named in configuration are **[DESIGN]**.
+Credentials for client-token verification and for publisher authentication
+should be separable so each can be rotated independently **[DESIGN]**.
+Secrets are never sent to clients, logged, or included in errors. Rotation
+approach **[DESIGN]**.
 
-## 3. Private channel authorization
+## 3. Connection tokens
 
 ```text
- Client                    Project backend                 Realtime server
-   | request auth (socket_id, channel) |                          |
-   |---------------------------------->| authenticate user        |
-   |                                   | check permission         |
-   |                                   | sign with APP_SECRET     |
-   |<----------------------------------|                          |
-   | subscribe(channel, auth) ---------------------------------->|
-   |                                   |                          | verify signature
-   |                                   |                          | (constant-time)
-   |<------------------------------------- success or error ------|
+ Client / SDK                Project backend                 Realtime server
+   | request token (existing auth) |                              |
+   |------------------------------>| authenticate user            |
+   |                               | determine scope              |
+   |                               | issue short-lived token      |
+   |<------------------------------|                              |
+   | connect (protocol version, token) ------------------------->|
+   |                               |                              | validate token
+   |<----------------------------- connection established / error|
 ```
 
-Server-side verification requirements:
+Server-side validation requirements (mechanism **[DESIGN]**):
 
-1. Recompute the expected signature from the connection's own socket ID, the
-   channel name, and the app secret, using `node:crypto` HMAC.
-2. Compare using a constant-time comparison.
-3. The socket ID must come from the server's record of that connection, not from
+1. Verify token integrity/authenticity using the deployment's verification
+   credential, using `node:crypto`, with constant-time comparison for any secret
+   comparison.
+2. Reject expired tokens (clock-skew tolerance **[DESIGN]**) and tokens intended
+   for another deployment.
+3. Validate the claims shape with Zod and enforce size limits.
+4. Derive the connection's permitted scope only from verified claims, never from
    client-supplied data.
-4. On mismatch or malformed input, reject the subscription with a
-   protocol-compatible error; do not reveal which element failed beyond what the
-   protocol requires; do not log the signature.
+5. On failure, reject with a generic error; do not reveal which check failed
+   beyond what the protocol requires; never log the token.
 
-Signed string layout and key-prefix format **[VERIFY]**.
+## 4. Private channel authorization
 
-## 4. Presence authorization (only if confirmed in scope)
+The server accepts a private-channel subscription only when verifiable,
+unexpired evidence issued by the consuming backend covers that channel for that
+connection. Two candidate models are **[DESIGN]** items for ADR-0020:
 
-In addition to section 3, the response carries user identification data that is
-part of the signed content. The server verifies the signature over that data,
-validates the data shape (Zod), enforces size limits, and uses only verified
-data to build membership. Details **[VERIFY]**.
+- **Token-embedded scope:** channels or channel patterns permitted for the
+  connection are claims in the connection token. Fewer round trips; permission
+  changes apply at token expiry.
+- **Per-channel grant:** the backend issues a short-lived grant per channel,
+  bound to the connection. Finer control; more backend round trips.
 
-## 5. Publisher (server-to-server) authentication
+Either way: the evidence is verified before any state change; failures reject
+the subscription; the evidence is never logged.
 
-Backend publishing requests are authenticated by a request signature and
-timestamp. See [PUBLISHING-API.md](PUBLISHING-API.md). Publisher credentials and
-channel authorization use the same app secret but must be verified by separate
-code paths with separate tests.
+## 5. Presence claims (only if required)
 
-## 6. Origin policy
+If presence is required, identity data used for membership must be part of
+verified claims. The server validates the data shape (Zod), enforces size limits,
+and builds membership only from verified data. Details **[DESIGN]**.
+
+## 6. Publisher (server-to-server) authentication
+
+Backend publishing requests are authenticated separately. See
+[PUBLISHING-API.md](PUBLISHING-API.md). Publisher authentication and client
+token validation must use separate verification paths and separate tests.
+
+## 7. Origin policy
 
 Allowed origins are configured per deployment and checked at WebSocket upgrade.
 Behavior for absent `Origin` (non-browser clients) **[OPEN]**. Origin checks are
-defense in depth; they do not replace signature verification.
+defense in depth; they do not replace token validation.
 
-## 7. Error and logging rules
+## 8. Error and logging rules
 
-- Authorization failures return protocol-compatible errors without secrets,
-  expected signatures, or stack traces.
+- Authentication/authorization failures return protocol errors without secrets,
+  tokens, expected values, or stack traces.
 - Log structured events (reason category, channel type, connection ID); never the
-  signature, secret, or auth payload.
-- Count authorization failures as a metric.
+  token, grant, signature, or secret.
+- Count authentication and authorization failures as metrics.
 
-## 8. Tests required (once implementation is authorized)
+## 9. Tests required (once implementation is authorized)
 
-Valid signature; wrong secret; wrong socket ID; wrong channel; tampered or
-truncated signature; empty or oversized auth; replayed auth against a different
-connection; constant-time comparison used; presence data tampering; no secret in
-logs or error output.
+Valid token; expired token; token for another deployment; tampered or truncated
+token; wrong key; missing or oversized token; private-channel evidence for a
+different channel or connection; expired evidence; constant-time comparison
+used; presence claim tampering; no secret or token in logs or error output.
 
-## 9. Open items
+## 10. Open and design items
 
-- **[OPEN]** Existing company authorization endpoints and response formats (Phase 00).
+- **[DESIGN]** Token format, claims, scope model, verification scheme, lifetime, delivery.
+- **[DESIGN]** Private-channel evidence model.
+- **[DESIGN]** Behavior when a token expires during a connection.
+- **[DESIGN]** Credential rotation and multiple-key support.
 - **[OPEN]** Whether presence is required.
-- **[OPEN]** Secret rotation and multiple-secret support.
 - **[OPEN]** Missing-`Origin` policy and per-deployment origin configuration shape.

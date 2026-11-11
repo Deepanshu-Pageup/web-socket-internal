@@ -27,7 +27,7 @@ Uses the standard Node package manager; contributors must use npm for dependency
 
 - This ADR applies to the generic internal real-time server, not to business logic in consuming applications.
 - Do not add infrastructure or scope beyond the decision without documenting and reviewing the trade-off.
-- For Pusher compatibility decisions, validate behavior against the company's actual client and server SDK versions.
+- Protocol, authentication, and publishing contracts are project-owned design items; do not treat them as decided until their ADRs are approved.
 
 ## Review checklist
 

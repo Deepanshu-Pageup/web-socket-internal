@@ -31,9 +31,14 @@ without the required evidence and review/approval.
 - Treat the product specification, roadmap, phase scope, and approved ADRs as
   the source of truth. Resolve conflicts explicitly; do not silently choose a
   convenient interpretation.
-- Base compatibility requirements on actual company integrations, SDK
-  versions, protocol evidence, and tests. Pusher feature availability alone is
-  not evidence that a feature is required.
+- Base requirements on actual company projects, integrations, workload, and
+  tests. Another realtime system offering a feature is not evidence that the
+  feature is required.
+- The protocol, client SDK, authentication model, publishing API, and channel
+  and event conventions are project-owned (ADR-0004). Message names, token
+  formats, cryptographic algorithms, and endpoint contracts are design items:
+  specify and obtain approval before implementing them. Do not implement
+  third-party protocol or SDK compatibility.
 - Do not finalize behavior for unresolved discovery questions. Record the
   question and evidence needed.
 - Do not silently expand the current phase, begin a later phase, or introduce
@@ -63,9 +68,10 @@ Do not add, replace, or materially change dependencies, storage, network
 services, frameworks, or deployment architecture without explaining the need
 and obtaining the required review.
 
-Keep transport, Pusher protocol, connection lifecycle, channel/subscription
-logic, event dispatch, authorization, publishing API, and operational concerns
-in distinct responsibilities. The server must not own or mutate consuming
+Keep transport, application protocol, connection lifecycle, channel/subscription
+logic, event dispatch, authorization, publishing API, client SDK, and
+operational concerns in distinct responsibilities. Keep the SDK's public API
+separate from its internal protocol implementation. The server must not own or mutate consuming
 applications' business records.
 
 ## 4. Coding standards
@@ -98,8 +104,9 @@ applications' business records.
   examples, fixtures, logs, or committed configuration.
 - Do not request or reproduce production secrets. Use placeholders and
   sanitized evidence.
-- Verify publisher signatures/timestamps and protected-channel authorization
-  signatures as required by the approved compatibility scope.
+- Authenticate publishers, apply replay protection, and validate connection
+  tokens and private-channel authorization as required by the approved
+  authentication and publishing designs. Never log tokens.
 - Validate origins, channel/event names, payloads, and resource limits.
 - Restrict operational endpoints; do not expose secrets or sensitive
   connection-level data.

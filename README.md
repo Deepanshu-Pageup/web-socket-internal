@@ -1,8 +1,10 @@
 # Internal Realtime Server
 
-Self-hosted, Pusher Channels-compatible realtime server. See `roadmap/` for the
-phased plan and `docs/` for architecture and ADRs. Current state: Phase 02
-project foundation only; no WebSocket or Pusher functionality yet.
+Self-hosted, independent realtime system: a WebSocket server with its own
+versioned protocol, a first-party TypeScript client SDK, and a versioned HTTP
+publishing API. See `roadmap/` for the phased plan and `docs/` for architecture
+and ADRs. Current state: Phase 02 project foundation only; no WebSocket,
+protocol, or publishing functionality yet.
 
 ## Requirements
 

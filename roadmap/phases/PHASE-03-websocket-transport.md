@@ -26,4 +26,4 @@ Implement a tested WebSocket transport boundary using the selected `ws` library.
 
 ## Exit criteria
 
-Transport behavior is correct under valid/invalid requests, disconnects, slow clients, and shutdown. No Pusher channel logic belongs in this layer.
+Transport behavior is correct under valid/invalid requests, disconnects, slow clients, and shutdown. No protocol or channel logic belongs in this layer.
