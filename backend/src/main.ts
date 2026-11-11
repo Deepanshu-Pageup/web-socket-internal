@@ -1,6 +1,7 @@
 import { ConfigError, loadConfig } from './config/config.js';
 import { createHttpServer } from './http/http-server.js';
 import { createLogger } from './logging/logger.js';
+import { createWebSocketTransport } from './transport/websocket-transport.js';
 
 function main(): void {
   let config;
@@ -19,6 +20,29 @@ function main(): void {
   const logger = createLogger(config.logLevel);
   let ready = false;
   const server = createHttpServer(() => ready);
+
+  // Transport only: no application protocol exists yet (Phase 04), so inbound
+  // frames are counted by the transport and otherwise ignored.
+  const transport = createWebSocketTransport(
+    {
+      path: config.wsPath,
+      allowedOrigins: config.allowedOrigins,
+      maxPayloadBytes: config.wsMaxPayloadBytes,
+      pingIntervalMs: config.wsPingIntervalMs,
+      maxConnections: config.wsMaxConnections,
+      maxBufferedBytes: config.wsMaxBufferedBytes,
+    },
+    {
+      onConnection: () => undefined,
+      onMessage: () => undefined,
+      onClose: () => undefined,
+    },
+    logger,
+  );
+  transport.attach(server);
+  if (config.allowedOrigins.length === 0) {
+    logger.warn('ALLOWED_ORIGINS is empty; WebSocket origin checking is disabled');
+  }
 
   server.listen(config.port, config.host, () => {
     ready = true;
@@ -44,7 +68,10 @@ function main(): void {
       logger.info('shutdown complete');
       process.exit(0);
     });
-    server.closeAllConnections();
+    // Leave time for the process-level timeout above to act as the hard stop.
+    void transport.close(Math.max(0, config.shutdownTimeoutMs - 500)).then(() => {
+      server.closeAllConnections();
+    });
   };
 
   process.on('SIGTERM', () => {

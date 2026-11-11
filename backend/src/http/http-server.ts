@@ -17,7 +17,8 @@ function sendJson(
 }
 
 /**
- * Minimal HTTP skeleton: liveness and readiness only. No WebSocket upgrade,
+ * Minimal HTTP server: liveness and readiness only. WebSocket upgrades are
+ * handled by the transport module, which attaches to this server. No
  * publishing or statistics endpoints exist at this phase.
  */
 export function createHttpServer(isReady: ReadinessProbe): Server {

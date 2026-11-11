@@ -1,7 +1,12 @@
 # Phase 03 — WebSocket Transport
 
-**Status:** Not started  
+**Status:** In progress  
 **Depends on:** Phase 02
+
+**Progress note (2026-11-11):** Started on the project owner's approval of the
+Phase 03 plan. Transport module implemented in `src/transport/` with an
+`UpgradeAuthenticator` hook (interface only; no token logic) and wired into
+`src/main.ts`. Awaiting owner review before the status is changed to Complete.
 
 ## Objective
 

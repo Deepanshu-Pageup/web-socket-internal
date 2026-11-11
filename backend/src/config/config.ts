@@ -16,6 +16,15 @@ const configSchema = z.object({
         .filter((origin) => origin.length > 0),
     ),
   SHUTDOWN_TIMEOUT_MS: z.coerce.number().int().min(0).max(120_000).default(10_000),
+  WS_PATH: z
+    .string()
+    .regex(/^\/[A-Za-z0-9._~/-]*$/)
+    .refine((value) => value !== '/health' && value !== '/ready')
+    .default('/ws'),
+  WS_MAX_PAYLOAD_BYTES: z.coerce.number().int().min(1).max(16_777_216).default(65_536),
+  WS_PING_INTERVAL_MS: z.coerce.number().int().min(10).max(300_000).default(30_000),
+  WS_MAX_CONNECTIONS: z.coerce.number().int().min(1).max(1_000_000).default(10_000),
+  WS_MAX_BUFFERED_BYTES: z.coerce.number().int().min(1).max(268_435_456).default(1_048_576),
 });
 
 export type Config = Readonly<{
@@ -24,6 +33,11 @@ export type Config = Readonly<{
   logLevel: (typeof logLevels)[number];
   allowedOrigins: readonly string[];
   shutdownTimeoutMs: number;
+  wsPath: string;
+  wsMaxPayloadBytes: number;
+  wsPingIntervalMs: number;
+  wsMaxConnections: number;
+  wsMaxBufferedBytes: number;
 }>;
 
 export class ConfigError extends Error {
@@ -56,5 +70,10 @@ export function loadConfig(env: Readonly<Record<string, string | undefined>>): C
     logLevel: data.LOG_LEVEL,
     allowedOrigins: data.ALLOWED_ORIGINS,
     shutdownTimeoutMs: data.SHUTDOWN_TIMEOUT_MS,
+    wsPath: data.WS_PATH,
+    wsMaxPayloadBytes: data.WS_MAX_PAYLOAD_BYTES,
+    wsPingIntervalMs: data.WS_PING_INTERVAL_MS,
+    wsMaxConnections: data.WS_MAX_CONNECTIONS,
+    wsMaxBufferedBytes: data.WS_MAX_BUFFERED_BYTES,
   };
 }

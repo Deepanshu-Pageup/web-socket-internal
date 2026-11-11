@@ -24,6 +24,22 @@ describe('loadConfig', () => {
     expect(config.allowedOrigins).toEqual(['https://a.example', 'https://b.example']);
   });
 
+  it('applies WebSocket transport defaults', () => {
+    const config = loadConfig(validEnv);
+    expect(config.wsPath).toBe('/ws');
+    expect(config.wsMaxPayloadBytes).toBe(65_536);
+    expect(config.wsPingIntervalMs).toBe(30_000);
+    expect(config.wsMaxConnections).toBe(10_000);
+    expect(config.wsMaxBufferedBytes).toBe(1_048_576);
+  });
+
+  it('rejects invalid WebSocket transport settings', () => {
+    expect(() => loadConfig({ ...validEnv, WS_PATH: 'ws' })).toThrow(ConfigError);
+    expect(() => loadConfig({ ...validEnv, WS_PATH: '/health' })).toThrow(ConfigError);
+    expect(() => loadConfig({ ...validEnv, WS_MAX_PAYLOAD_BYTES: '0' })).toThrow(ConfigError);
+    expect(() => loadConfig({ ...validEnv, WS_MAX_CONNECTIONS: '0' })).toThrow(ConfigError);
+  });
+
   it('rejects an invalid port', () => {
     expect(() => loadConfig({ ...validEnv, PORT: '70000' })).toThrow(ConfigError);
   });
