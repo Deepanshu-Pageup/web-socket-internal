@@ -4,14 +4,12 @@ export type { Logger };
 
 /** Paths whose values must never appear in logs. */
 export const redactPaths: readonly string[] = [
-  'appSecret',
   'secret',
   'signature',
   'auth',
   'authorization',
   'payload',
   'data',
-  '*.appSecret',
   '*.secret',
   '*.signature',
   '*.auth',

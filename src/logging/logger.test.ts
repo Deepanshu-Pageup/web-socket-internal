@@ -18,7 +18,7 @@ describe('createLogger', () => {
     const { stream, lines } = capture();
     const logger = createLogger('info', stream);
     logger.info(
-      { appSecret: 'secret-value', signature: 'sig-value', payload: 'payload-value' },
+      { secret: 'secret-value', signature: 'sig-value', payload: 'payload-value' },
       'test',
     );
     const output = lines().join('');
