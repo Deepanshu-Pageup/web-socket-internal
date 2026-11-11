@@ -1,8 +1,20 @@
 # Phase 04 — Application Protocol
 
-**Status:** Not started  
+**Status:** In progress (specification stage only)  
 **Depends on:** Phases 00, 01, and 03
 
+**Progress note (2026-11-11):** The specification in
+`docs/protocol/protocol-specification.md` was approved on the project owner's
+instruction ("Do it"), taking every recommended option; ADR-0018 was accepted on
+the same basis (ADR-0021 remains Proposed). The protocol module is implemented
+in `backend/src/protocol/` (Zod schemas, parser, serializer, error/close-code
+catalog, version negotiation, per-connection session logic) with shared
+fixtures in `backend/src/protocol/fixtures/`. Checks run: typecheck, lint,
+format check, build and `vitest run` (5 files, 84 tests) passed.
+**Not done:** the module is not wired into the transport/`main.ts`, so no
+end-to-end protocol flow runs over a real socket yet (this needs the channel
+layer from Phase 05 to answer `subscribe`). Awaiting owner review before the
+status is changed to Complete.
 ## Objective
 
 Specify and implement the project's own versioned WebSocket application protocol on top of the standard WebSocket transport. No third-party protocol compatibility is in scope (ADR-0004, ADR-0018).

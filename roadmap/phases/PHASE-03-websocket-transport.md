@@ -1,12 +1,17 @@
 # Phase 03 — WebSocket Transport
 
-**Status:** In progress  
+**Status:** Complete  
 **Depends on:** Phase 02
 
-**Progress note (2026-11-11):** Started on the project owner's approval of the
-Phase 03 plan. Transport module implemented in `src/transport/` with an
+**Completion record (2026-11-11):** Marked complete on the project owner's
+acceptance. Transport module implemented in `backend/src/transport/` with an
 `UpgradeAuthenticator` hook (interface only; no token logic) and wired into
-`src/main.ts`. Awaiting owner review before the status is changed to Complete.
+`backend/src/main.ts`. Checks run by the assistant before acceptance: typecheck,
+lint, format check, build, and `vitest run` (4 files, 33 tests) passed. Not
+verified: manual run of the built server, shutdown signal handling on a real
+process, and the Docker build. Known limitation: until an authentication design
+is approved (ADR-0020), any upgrade passing path/origin/capacity checks is
+accepted.
 
 ## Objective
 

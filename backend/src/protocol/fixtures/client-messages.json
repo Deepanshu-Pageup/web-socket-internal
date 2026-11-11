@@ -1,0 +1,70 @@
+{
+  "valid": [
+    {
+      "name": "subscribe with id",
+      "raw": "{\"type\":\"subscribe\",\"channel\":\"orders.updates\",\"id\":\"c1\"}",
+      "expected": { "type": "subscribe", "channel": "orders.updates", "id": "c1" }
+    },
+    {
+      "name": "subscribe without id",
+      "raw": "{\"type\":\"subscribe\",\"channel\":\"orders.updates\"}",
+      "expected": { "type": "subscribe", "channel": "orders.updates" }
+    },
+    {
+      "name": "unsubscribe with id",
+      "raw": "{\"type\":\"unsubscribe\",\"channel\":\"orders.updates\",\"id\":\"c2\"}",
+      "expected": { "type": "unsubscribe", "channel": "orders.updates", "id": "c2" }
+    },
+    {
+      "name": "ping with id",
+      "raw": "{\"type\":\"ping\",\"id\":\"p1\"}",
+      "expected": { "type": "ping", "id": "p1" }
+    },
+    {
+      "name": "ping without id",
+      "raw": "{\"type\":\"ping\"}",
+      "expected": { "type": "ping" }
+    }
+  ],
+  "invalid": [
+    { "name": "empty text", "raw": "", "code": "invalid_message" },
+    { "name": "not json", "raw": "not json", "code": "invalid_message" },
+    { "name": "json array", "raw": "[]", "code": "invalid_message" },
+    { "name": "missing type", "raw": "{\"channel\":\"a\"}", "code": "invalid_message" },
+    { "name": "non-string type", "raw": "{\"type\":1}", "code": "invalid_message" },
+    {
+      "name": "unknown type echoes valid id",
+      "raw": "{\"type\":\"publish\",\"channel\":\"a\",\"id\":\"c9\"}",
+      "code": "unknown_type",
+      "id": "c9"
+    },
+    {
+      "name": "unknown field is rejected",
+      "raw": "{\"type\":\"ping\",\"extra\":1}",
+      "code": "invalid_message"
+    },
+    {
+      "name": "subscribe without channel",
+      "raw": "{\"type\":\"subscribe\"}",
+      "code": "invalid_message"
+    },
+    {
+      "name": "channel is not a string",
+      "raw": "{\"type\":\"subscribe\",\"channel\":5}",
+      "code": "invalid_message"
+    },
+    {
+      "name": "channel name not allowed",
+      "raw": "{\"type\":\"subscribe\",\"channel\":\"bad channel!\",\"id\":\"c3\"}",
+      "code": "invalid_channel",
+      "id": "c3"
+    },
+    {
+      "name": "channel name starts with a separator",
+      "raw": "{\"type\":\"unsubscribe\",\"channel\":\".hidden\"}",
+      "code": "invalid_channel"
+    },
+    { "name": "empty id", "raw": "{\"type\":\"ping\",\"id\":\"\"}", "code": "invalid_message" },
+    { "name": "non-string id", "raw": "{\"type\":\"ping\",\"id\":7}", "code": "invalid_message" }
+  ]
+}

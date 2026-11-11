@@ -1,0 +1,59 @@
+{
+  "cases": [
+    {
+      "name": "connected",
+      "message": {
+        "type": "connected",
+        "connectionId": "example-connection",
+        "heartbeatIntervalMs": 25000
+      },
+      "serialized": "{\"type\":\"connected\",\"connectionId\":\"example-connection\",\"heartbeatIntervalMs\":25000}"
+    },
+    {
+      "name": "subscribed",
+      "message": { "type": "subscribed", "channel": "orders.updates", "id": "c1" },
+      "serialized": "{\"type\":\"subscribed\",\"channel\":\"orders.updates\",\"id\":\"c1\"}"
+    },
+    {
+      "name": "unsubscribed without id",
+      "message": { "type": "unsubscribed", "channel": "orders.updates" },
+      "serialized": "{\"type\":\"unsubscribed\",\"channel\":\"orders.updates\"}"
+    },
+    {
+      "name": "event",
+      "message": {
+        "type": "event",
+        "channel": "orders.updates",
+        "event": "order.changed",
+        "data": { "orderId": "example" }
+      },
+      "serialized": "{\"type\":\"event\",\"channel\":\"orders.updates\",\"event\":\"order.changed\",\"data\":{\"orderId\":\"example\"}}"
+    },
+    {
+      "name": "pong",
+      "message": { "type": "pong", "id": "p1" },
+      "serialized": "{\"type\":\"pong\",\"id\":\"p1\"}"
+    },
+    {
+      "name": "invalid channel error",
+      "message": {
+        "type": "error",
+        "error": { "code": "invalid_channel", "message": "The channel name is not valid." },
+        "id": "c3"
+      },
+      "serialized": "{\"type\":\"error\",\"error\":{\"code\":\"invalid_channel\",\"message\":\"The channel name is not valid.\"},\"id\":\"c3\"}"
+    },
+    {
+      "name": "unsupported version error",
+      "message": {
+        "type": "error",
+        "error": {
+          "code": "unsupported_version",
+          "message": "The protocol version is not supported."
+        },
+        "supportedVersions": [1]
+      },
+      "serialized": "{\"type\":\"error\",\"error\":{\"code\":\"unsupported_version\",\"message\":\"The protocol version is not supported.\"},\"supportedVersions\":[1]}"
+    }
+  ]
+}
