@@ -1,7 +1,16 @@
 # Phase 06 — Authentication & Presence
 
-**Status:** Not started  
+**Status:** In progress (partial scope)  
 **Depends on:** Phase 05 and Phase 00 requirements
+
+**Progress note (2026-11-11):** Started on the project owner's approval of the
+Phase 06 plan, although Phase 05 is Deferred. In scope now: connection-token
+verification, the channel-scope check, origin policy (unchanged), and log
+redaction, per `docs/auth/token-and-authorization-specification.md`. Out of
+scope for now: publisher authentication (moves to the Phase 07 design) and
+presence (no requirement). Private-channel enforcement cannot be applied or
+tested end to end until the channel layer exists, so this phase cannot be marked
+Complete before Phase 05 is done.
 
 ## Objective
 

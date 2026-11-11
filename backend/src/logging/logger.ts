@@ -5,12 +5,16 @@ export type { Logger };
 /** Paths whose values must never appear in logs. */
 export const redactPaths: readonly string[] = [
   'secret',
+  'token',
+  'authKeys',
   'signature',
   'auth',
   'authorization',
   'payload',
   'data',
   '*.secret',
+  '*.token',
+  '*.authKeys',
   '*.signature',
   '*.auth',
   '*.authorization',

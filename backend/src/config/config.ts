@@ -1,8 +1,35 @@
 import { z } from 'zod';
+import { keyIdRegex } from '../auth/token-claims.js';
 
 const logLevels = ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'] as const;
 
+/** `kid:secret` pairs, comma separated. Secrets must be at least 32 characters. */
+const authKeysSchema = z.string().transform((value, ctx) => {
+  const keys = new Map<string, string>();
+  for (const entry of value.split(',')) {
+    const trimmed = entry.trim();
+    if (trimmed.length === 0) continue;
+    const separator = trimmed.indexOf(':');
+    const kid = separator < 0 ? '' : trimmed.slice(0, separator);
+    const secret = separator < 0 ? '' : trimmed.slice(separator + 1);
+    if (!keyIdRegex.test(kid) || secret.length < 32 || /\s/.test(secret) || keys.has(kid)) {
+      ctx.addIssue({ code: 'custom', message: 'invalid key entry' });
+      return z.NEVER;
+    }
+    keys.set(kid, secret);
+  }
+  if (keys.size === 0) {
+    ctx.addIssue({ code: 'custom', message: 'at least one key is required' });
+    return z.NEVER;
+  }
+  return keys;
+});
+
 const configSchema = z.object({
+  AUTH_TOKEN_KEYS: authKeysSchema,
+  AUTH_DEPLOYMENT_ID: z.string().regex(/^[A-Za-z0-9._-]{1,64}$/),
+  AUTH_TOKEN_MAX_LIFETIME_S: z.coerce.number().int().min(1).max(86_400).default(300),
+  AUTH_CLOCK_SKEW_S: z.coerce.number().int().min(0).max(60).default(5),
   HOST: z.string().min(1).default('0.0.0.0'),
   PORT: z.coerce.number().int().min(1).max(65535).default(6001),
   LOG_LEVEL: z.enum(logLevels).default('info'),
@@ -28,6 +55,10 @@ const configSchema = z.object({
 });
 
 export type Config = Readonly<{
+  authKeys: ReadonlyMap<string, string>;
+  authDeploymentId: string;
+  authMaxLifetimeSeconds: number;
+  authClockSkewSeconds: number;
   host: string;
   port: number;
   logLevel: (typeof logLevels)[number];
@@ -65,6 +96,10 @@ export function loadConfig(env: Readonly<Record<string, string | undefined>>): C
   }
   const data = result.data;
   return {
+    authKeys: data.AUTH_TOKEN_KEYS,
+    authDeploymentId: data.AUTH_DEPLOYMENT_ID,
+    authMaxLifetimeSeconds: data.AUTH_TOKEN_MAX_LIFETIME_S,
+    authClockSkewSeconds: data.AUTH_CLOCK_SKEW_S,
     host: data.HOST,
     port: data.PORT,
     logLevel: data.LOG_LEVEL,

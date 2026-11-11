@@ -53,6 +53,7 @@ class Connection implements TransportConnection {
     private readonly maxBufferedBytes: number,
     private readonly onSlowClient: () => void,
     private readonly log: Logger,
+    readonly attachment: unknown,
   ) {}
 
   get state(): ConnectionState {
@@ -161,7 +162,12 @@ export function createWebSocketTransport(
     pingTimer = undefined;
   };
 
-  const accept = (request: IncomingMessage, socket: Duplex, head: Buffer): void => {
+  const accept = (
+    request: IncomingMessage,
+    socket: Duplex,
+    head: Buffer,
+    attachment: unknown,
+  ): void => {
     wss.handleUpgrade(request, socket, head, (ws) => {
       const connection = new Connection(
         ws,
@@ -170,6 +176,7 @@ export function createWebSocketTransport(
           counters.slow += 1;
         },
         log,
+        attachment,
       );
       connections.add(connection);
       counters.accepted += 1;
@@ -269,7 +276,7 @@ export function createWebSocketTransport(
 
     const { authenticate } = options;
     if (!authenticate) {
-      accept(request, socket, head);
+      accept(request, socket, head, undefined);
       return;
     }
 
@@ -292,7 +299,7 @@ export function createWebSocketTransport(
           } else if (!decision.allow) {
             reject(socket, decision.status, 'authentication_failed');
           } else {
-            accept(request, socket, head);
+            accept(request, socket, head, decision.attachment);
           }
         },
         () => {

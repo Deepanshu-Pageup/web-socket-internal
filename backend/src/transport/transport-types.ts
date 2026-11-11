@@ -20,6 +20,8 @@ export type SendResult = 'sent' | 'closed' | 'backpressure';
 export interface TransportConnection {
   readonly id: string;
   readonly state: ConnectionState;
+  /** Opaque value returned by the upgrade authenticator (for example verified claims). The transport never inspects it. */
+  readonly attachment: unknown;
   /** Queues a frame. Returns `backpressure` (and closes the connection) when the outbound buffer limit would be exceeded. */
   send(data: string | Uint8Array): SendResult;
   /** Starts the closing handshake. */
@@ -42,7 +44,8 @@ export interface UpgradeRequestInfo {
 }
 
 export type UpgradeDecision =
-  { readonly allow: true } | { readonly allow: false; readonly status: 401 | 403 };
+  | { readonly allow: true; readonly attachment?: unknown }
+  | { readonly allow: false; readonly status: 401 | 403 };
 
 /**
  * Hook for a later phase to accept or reject an upgrade. The transport does

@@ -1,6 +1,6 @@
 # ADR-0020: Backend-Issued Short-Lived Connection Tokens and Channel Authorization
 
-- **Status:** Proposed
+- **Status:** Accepted (2026-11-11, on the project owner's approval of `docs/auth/token-and-authorization-specification.md`; no further review notes recorded)
 - **Date:** 2026-11-11
 - **Decision owners:** Internal Realtime Server maintainers
 

@@ -4,8 +4,14 @@
 **Related:** [System architecture](SYSTEM-ARCHITECTURE.md) ·
 [Security](SECURITY.md) · [Channel and event flow](CHANNEL-AND-EVENT-FLOW.md)
 
-> Token formats, claim names, cryptographic algorithms, and wire fields are
-> **not finalized**. They are **[DESIGN]** items (ADR-0020) and must be specified
+> **Update (2026-11-11):** the connection-token format, verification, scope
+> model and delivery are now specified in
+> [../auth/token-and-authorization-specification.md](../auth/token-and-authorization-specification.md);
+> where this draft differs, that document wins. Publisher authentication and
+> presence below are still undecided.
+>
+> Token formats, claim names, cryptographic algorithms, and wire fields were
+> **not finalized** when this draft was written. They are **[DESIGN]** items (ADR-0020) and must be specified
 > and approved before implementation. Examples use placeholders only; never use
 > real keys, secrets, or tokens.
 

@@ -8,6 +8,10 @@ later phases.
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
+| `AUTH_TOKEN_KEYS` | yes | — | Comma-separated `kid:secret` pairs used to verify connection tokens. Each secret is at least 32 characters. Never expose to clients or logs. |
+| `AUTH_DEPLOYMENT_ID` | yes | — | This deployment's id (`A-Za-z0-9._-`, 1–64). Tokens for another deployment are rejected. |
+| `AUTH_TOKEN_MAX_LIFETIME_S` | no | `300` | Largest accepted token lifetime (`exp - iat`), 1–86400 seconds. |
+| `AUTH_CLOCK_SKEW_S` | no | `5` | Clock-skew tolerance for token times, 0–60 seconds. |
 | `HOST` | no | `0.0.0.0` | Interface to bind. |
 | `PORT` | no | `6001` | TCP port (1–65535). |
 | `LOG_LEVEL` | no | `info` | `fatal`, `error`, `warn`, `info`, `debug`, `trace`, `silent`. |
@@ -19,9 +23,10 @@ later phases.
 | `WS_MAX_CONNECTIONS` | no | `10000` | Max concurrent connections (including in-flight upgrades). Excess upgrades get 503. |
 | `WS_MAX_BUFFERED_BYTES` | no | `1048576` | Max outbound buffered bytes per connection. Exceeding it closes the client with 1008. Keep it at least as large as the largest message the server will send. |
 
-No credential variables exist yet. Client-token verification and publisher
-credentials are design items in ADR-0020 and ADR-0009; variables will be added
-only after those designs are approved.
+The `AUTH_*` variables configure connection-token verification
+(`docs/auth/token-and-authorization-specification.md`). Publisher credentials
+are a Phase 07 design item (ADR-0009) and have no variables yet. The server
+refuses to start without `AUTH_TOKEN_KEYS` and `AUTH_DEPLOYMENT_ID`.
 
 ## Endpoints (Phase 02 skeleton)
 
@@ -37,8 +42,9 @@ authentication or channel logic yet, and inbound frames are ignored.
 - `ALLOWED_ORIGINS` empty: origin checking is disabled (a warning is logged at
   startup). Non-empty: the `Origin` header must match exactly, and requests
   without one are rejected with 403.
-- Until an authentication design is approved (ADR-0020), any upgrade that passes
-  these checks is accepted. Do not expose this build to untrusted networks.
+- The upgrade request must carry a valid connection token in the `token` query
+  parameter; otherwise it is rejected with a generic 401. Origin checks do not
+  replace token validation.
 - Per-message compression is disabled.
 
 No publishing or statistics endpoints exist yet.

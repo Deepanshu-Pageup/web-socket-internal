@@ -1,7 +1,16 @@
 # Phase 05 — Channel & Event System
 
-**Status:** Not started  
+**Status:** Deferred  
 **Depends on:** Phase 04
+
+**Deferral record (2026-11-11):** Set to Deferred on the project owner's
+instruction, who asked for this phase to be marked complete; it was **not**
+implemented, so it is recorded as Deferred rather than Complete. No channel
+manager, subscription manager, event dispatcher or multi-client tests exist, and
+the protocol module (`backend/src/protocol/`) is not wired into the transport.
+Later phases that depend on the channel layer (private-channel enforcement in
+Phase 06, delivery in Phase 07) cannot be fully verified until this phase is
+done. It must be implemented before the project can be considered functional.
 
 ## Objective
 

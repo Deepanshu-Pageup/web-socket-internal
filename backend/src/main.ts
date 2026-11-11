@@ -1,3 +1,4 @@
+import { createUpgradeAuthenticator } from './auth/upgrade-authenticator.js';
 import { ConfigError, loadConfig } from './config/config.js';
 import { createHttpServer } from './http/http-server.js';
 import { createLogger } from './logging/logger.js';
@@ -31,6 +32,15 @@ function main(): void {
       pingIntervalMs: config.wsPingIntervalMs,
       maxConnections: config.wsMaxConnections,
       maxBufferedBytes: config.wsMaxBufferedBytes,
+      authenticate: createUpgradeAuthenticator(
+        {
+          keys: config.authKeys,
+          deploymentId: config.authDeploymentId,
+          maxLifetimeSeconds: config.authMaxLifetimeSeconds,
+          clockSkewSeconds: config.authClockSkewSeconds,
+        },
+        logger,
+      ),
     },
     {
       onConnection: () => undefined,
